@@ -4,12 +4,14 @@ using DeepForestLabs;
 using DeepForestLabs.Factories;
 using UnityEngine;
 
-public sealed class AppContainerFactory : ContainerBuilderFactory
-{
-    public override IContainerBuilder AddToBuilder(IContainerBuilder builder)
+namespace GameName.Factories {
+    public sealed class AppContainerFactory : ContainerBuilderFactory
     {
-        return builder
-            .AddTransient<AppState>();
+        public override IContainerBuilder AddToBuilder(IContainerBuilder builder)
+        {
+            return builder
+                .AddTransient<AppState>();
+        }
     }
 }
 #nullable disable
