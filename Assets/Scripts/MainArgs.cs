@@ -1,6 +1,7 @@
 #nullable enable
 using DeepForestLabs;
 using DeepForestLabs.BuildSystems;
+using DeepForestLabs.States.Error.Controllers;
 
 public sealed class MainArgs : DeepForestLabs.MainArgs
 {
@@ -8,9 +9,9 @@ public sealed class MainArgs : DeepForestLabs.MainArgs
     {
         return base.AddToBuilder(builder)
             .AddSingleton(BuildSettings.Instance)
-            .AddSingleton<IMain, AppMain>()
-            .AddSingleton<IAnalyticsErrorHelper, NullAnalyticsHelper>()
-            .AddSingleton<IErrorStateController, NullErrorController>();
+            .AddScoped<IMain, AppMain>()
+            .AddScoped<IAnalyticsErrorHelper, NullAnalyticsHelper>()
+            .AddScoped<IErrorStateController, NullErrorController>();
     }
 }
 #nullable disable

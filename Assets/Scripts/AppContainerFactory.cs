@@ -9,8 +9,6 @@ public sealed class AppContainerFactory : ContainerBuilderFactory
     public override IContainerBuilder AddToBuilder(IContainerBuilder builder)
     {
         return builder
-            .PushToServiceLocator()
-            .PushRequestScope()
             .AddTransient<AppState>();
     }
 }

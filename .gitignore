@@ -68,5 +68,8 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+# Package lock (auto-generated, project-specific)
+Packages/packages-lock.json
+
 # macOS
 .DS_Store

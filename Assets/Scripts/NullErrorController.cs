@@ -2,7 +2,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using DeepForestLabs;
+using DeepForestLabs.States.Error.Controllers;
 
 public sealed class NullErrorController : IErrorStateController
 {
