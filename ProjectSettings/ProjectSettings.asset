@@ -775,18 +775,22 @@ PlayerSettings:
   scriptingDefineSymbols:
     Android: NOT_RELEASE_BUILD
     Standalone: NOT_RELEASE_BUILD
+    WebGL: NOT_RELEASE_BUILD
     iOS: NOT_RELEASE_BUILD
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
     Android: 1
     Standalone: 1
+    WebGL: 1
     iPhone: 1
   il2cppCompilerConfiguration: {}
   il2cppCodeGeneration: {}
   il2cppStacktraceInformation: {}
   managedStrippingLevel:
     Android: 1
+    Standalone: 1
+    WebGL: 1
     iPhone: 1
   incrementalIl2cppBuild: {}
   suppressCommonWarnings: 1
