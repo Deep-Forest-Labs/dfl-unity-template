@@ -14,6 +14,7 @@
     "com.cysharp.unitask": "2.5.10",
     "com.cysharp.zstring": "2.6.0",
     "com.littlebigfun.addressable-importer": "0.17.0",
+    "com.deepforestlabs.audio": "file:../../dfl-unity-packages/Packages/com.deepforestlabs.audio",
     "com.deepforestlabs.buildsystem": "file:../../dfl-unity-packages/Packages/com.deepforestlabs.buildsystem",
     "com.deepforestlabs.framework": "file:../../dfl-unity-packages/Packages/com.deepforestlabs.framework",
     "com.deepforestlabs.logger": "file:../../dfl-unity-packages/Packages/com.deepforestlabs.logger",
