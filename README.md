@@ -98,6 +98,44 @@ The framework packages are sourced from [`dfl-unity-packages`](https://github.co
 - `com.deepforestlabs.framework` — core DI/MVC/async framework
 - `com.deepforestlabs.logger` — structured logging
 - `com.deepforestlabs.buildsystem` — multi-platform build pipeline and environment config
+- `com.deepforestlabs.audio` — audio service with pooling and mixer integration
+
+### ZLinq (zero-allocation LINQ)
+
+This template comes pre-configured with [ZLinq](https://github.com/Cysharp/ZLinq), a zero-allocation LINQ library from Cysharp. The drop-in source generator automatically optimizes all LINQ operations on arrays and lists with no code changes required.
+
+**How it works:** The `[assembly: ZLinqDropIn]` attribute in `Assets/Scripts/AssemblyInfo.cs` tells the source generator to create extension methods that shadow `System.Linq` for concrete collection types. Standard LINQ like `.Where()`, `.Select()`, `.FirstOrDefault()`, `.ToArray()` on `T[]` and `List<T>` compiles to zero-allocation ZLinq calls automatically.
+
+**ZLinq.Unity** provides zero-allocation GameObject/Transform tree traversal:
+
+```csharp
+using ZLinq;
+
+// Find all active enemies under a transform
+var enemies = transform.Descendants()
+    .OfComponent<EnemyController>()
+    .Where(e => e.IsAlive);
+
+// Get all child renderers
+var renderers = transform.Children()
+    .OfComponent<Renderer>();
+```
+
+**Manual optimization** for hot paths where you want explicit control:
+
+```csharp
+using ZLinq;
+
+// Explicit zero-alloc enumeration on any IEnumerable<T>
+foreach (var item in source.AsValueEnumerable().Where(x => x.IsActive))
+{
+    // ...
+}
+```
+
+**Configuration:** Edit `Assets/Scripts/AssemblyInfo.cs` to control which collection types are optimized. The default (`Array | List`) is conservative. Add `DropInGenerateTypes.Enumerable` to also optimize `IEnumerable<T>` sources (more aggressive, see [ZLinq docs](https://github.com/Cysharp/ZLinq#drop-in-replacement) for trade-offs).
+
+**NuGetForUnity:** The `ZLinq.DropInGenerator` source generator is managed via NuGetForUnity (configured in `Assets/packages.config`). On first project open, open **NuGet > Manage NuGet Packages** to restore packages if the generator DLL is not present.
 
 ## Notes
 

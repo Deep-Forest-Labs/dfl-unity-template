@@ -6,13 +6,16 @@
       "scopes": [
         "com.cysharp",
         "com.littlebigfun",
-        "io.sentry"
+        "io.sentry",
+        "com.github-glitchenzo"
       ]
     }
   ],
   "dependencies": {
     "com.cysharp.unitask": "2.5.10",
+    "com.cysharp.zlinq": "https://github.com/Cysharp/ZLinq.git?path=src/ZLinq.Unity/Assets/ZLinq.Unity#1.5.5",
     "com.cysharp.zstring": "2.6.0",
+    "com.github-glitchenzo.nugetforunity": "4.2.0",
     "com.littlebigfun.addressable-importer": "0.17.0",
     "com.deepforestlabs.audio": "file:../../dfl-unity-packages/Packages/com.deepforestlabs.audio",
     "com.deepforestlabs.buildsystem": "file:../../dfl-unity-packages/Packages/com.deepforestlabs.buildsystem",
