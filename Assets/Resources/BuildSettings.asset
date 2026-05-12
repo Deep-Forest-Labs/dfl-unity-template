@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 861c873aa0d604ed3add3d9a9ac5f3ca, type: 3}
   m_Name: BuildSettings
   m_EditorClassIdentifier: DeepForestLabs.BuildSystem::DeepForestLabs.BuildSystems.BuildSettings
-  _appName: 
+  _appName: DeepForestLabsGame
   _buildTarget: 
   _isCommandLineBuild: 0
   _buildNumber: -1
@@ -34,8 +34,10 @@ MonoBehaviour:
     apiUrl: 
     serverCommsKey: 
     userServiceKey: 
+  _orientation: 1
   _addressables:
     _uniqueId: default
     _assetId: release
     _enableJsonCatalog: 1
     _activePlayModeIndex: 0
+    _loadStrategy: 0

@@ -9,6 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2b1cb45a9e644b2da8c8f5ad36198e1, type: 3}
-  m_Name: LogFilter
-  m_EditorClassIdentifier: DeepForestLabs.Logger::DeepForestLabs.Logger.LogFilter
+  m_Script: {fileID: 11500000, guid: 0f2c5f7e4ed844deca1a1eb0b2860c53, type: 3}
+  m_Name: SoundGroupRegistry
+  m_EditorClassIdentifier: DeepForestLabs.Audio::DeepForestLabs.Audio.SoundGroupRegistry
+  _customGroups: []

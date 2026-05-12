@@ -12,3 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1a2b3c4e5f6a7b8c9d0e1f2a3b4c5d6, type: 3}
   m_Name: AppContainer
   m_EditorClassIdentifier: 
+  _audioMixerConfig: {fileID: 11400000, guid: ae660fb6bac4a4b528c4cb0ca5fab83e, type: 2}
+  _soundCatalog: {fileID: 11400000, guid: 0e7127fade0f647f3b8a2a56e1aa9efb, type: 2}
