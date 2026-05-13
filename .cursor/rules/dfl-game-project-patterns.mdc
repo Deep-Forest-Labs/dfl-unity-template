@@ -141,6 +141,116 @@ public sealed class GameplayContainerFactory : ContainerBuilderFactory
 }
 ```
 
+## Reactive State with AsyncReactiveProperty
+
+The framework uses UniTask's `AsyncReactiveProperty<T>` (from `Cysharp.Threading.Tasks`) for observable, change-notifying state. Prefer reactive properties over C# events for any state that multiple consumers need to read or observe.
+
+### How the MVC model is wired
+
+The `Factory` base class automatically wraps the model in `AsyncReactiveProperty<TModel>` during container build. Controllers receive it via `[Dependency]` and access it through the `Model` property:
+
+```csharp
+// Framework does this internally -- you do NOT write this yourself:
+builder.AddScoped(_ => new AsyncReactiveProperty<TModel>(_model));
+
+// In your controller, the base class exposes:
+//   Model (get/set)        -- read or replace the current model
+//   ModelUpdated            -- IUniTaskAsyncEnumerable<TModel> for async iteration
+//   _model.WaitAsync(token) -- UniTask<TModel> that completes on next change
+```
+
+Setting `Model = newModel` triggers reactive notifications. Call `Refresh()` to re-notify without changing the model reference.
+
+### Shared reactive state via DI
+
+For state that multiple services or controllers need to observe, register an `AsyncReactiveProperty<T>` in a `ContainerBuilderFactory`. Do NOT use C# events (`event Action<T>`) for cross-component state.
+
+```csharp
+// GOOD -- register reactive state in a factory
+public sealed class GameContainerFactory : ContainerBuilderFactory
+{
+    [SerializeField] private SessionConfig _defaultConfig = default!;
+
+    public override IContainerBuilder AddToBuilder(IContainerBuilder builder)
+    {
+        return builder
+            .AddScoped(_ => new AsyncReactiveProperty<SessionConfig>(_defaultConfig))
+            .AddScoped<ISessionService, SessionService>()
+            .AddTransient<IRunnable, GameState>();
+    }
+}
+
+// GOOD -- service writes .Value, any consumer reads or observes
+public sealed class SessionService : ISessionService
+{
+    [Dependency] private readonly AsyncReactiveProperty<SessionConfig> _config = default!;
+
+    public void UpdateConfig(SessionConfig config) => _config.Value = config;
+}
+
+// GOOD -- controller awaits changes
+public sealed class LobbyController : Controller<LobbyModel, LobbyView>
+{
+    [Dependency] private readonly AsyncReactiveProperty<SessionConfig> _config = default!;
+
+    protected override async UniTask<VoidReturn> Run(LobbyView view, CancellationToken token)
+    {
+        await foreach (var config in _config.WithoutCurrent().WithCancellation(token))
+        {
+            view.SetRegion(config.Region);
+        }
+        return default;
+    }
+}
+
+// BAD -- C# events require manual subscribe/unsubscribe, miss initial state,
+//         and hold references after disposal
+public event Action<SessionConfig>? ConfigChanged;
+```
+
+### Read-only interface pattern
+
+When a service owns mutable state but consumers should only observe, expose `IReadOnlyAsyncReactiveProperty<T>` on the interface:
+
+```csharp
+public interface IPauseService
+{
+    IReadOnlyAsyncReactiveProperty<bool> IsPaused { get; }
+    void Pause();
+    void Resume();
+}
+
+public sealed class PauseService : IPauseService, IDisposable
+{
+    private readonly AsyncReactiveProperty<bool> _isPaused = new(false);
+
+    public IReadOnlyAsyncReactiveProperty<bool> IsPaused => _isPaused;
+
+    public void Pause() => _isPaused.Value = true;
+    public void Resume() => _isPaused.Value = false;
+    public void Dispose() => _isPaused.Dispose();
+}
+```
+
+### Key API
+
+| Method | Returns | Purpose |
+|--------|---------|---------|
+| `.Value` (get/set) | `T` | Read or write current value; setting notifies all subscribers |
+| `.WaitAsync(token)` | `UniTask<T>` | Completes on the next value change |
+| `.WithoutCurrent()` | `IUniTaskAsyncEnumerable<T>` | Async stream that skips the current value |
+| `GetAsyncEnumerator()` | `IUniTaskAsyncEnumerator<T>` | `await foreach` -- yields current value first, then changes |
+| `.Dispose()` | `void` | Completes all subscribers |
+
+### When to use C# events vs reactive properties
+
+| Scenario | Use |
+|----------|-----|
+| Observable state that consumers read AND subscribe to | `AsyncReactiveProperty<T>` |
+| State shared across multiple controllers/services via DI | `AsyncReactiveProperty<T>` registered in factory |
+| Read-only observable state on a service interface | `IReadOnlyAsyncReactiveProperty<T>` |
+| One-shot fire-and-forget notification with no state | C# `event` is acceptable |
+
 ## Services
 
 Define an interface, implement as a class, register via `AddScoped<IService, Impl>()`:
