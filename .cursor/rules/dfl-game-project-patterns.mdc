@@ -1,0 +1,201 @@
+---
+description: DFL game project patterns -- states as runnables, MVC structure, services, container hierarchy, folder conventions
+alwaysApply: true
+---
+
+# DFL Game Project Patterns
+
+This project is built on `com.deepforestlabs.framework`. All game logic flows through DI containers, IRunnable states, and MVC controllers.
+
+## States as IRunnables
+
+Each game phase is an `IRunnable` that runs inside its own container scope. Register with `AddTransient<IRunnable, T>()` and run with `container.Run<IRunnable>(token)`.
+
+```csharp
+public sealed class SessionState : IRunnable
+{
+    [Dependency] private readonly IContainer _container = default!;
+    [Dependency] private readonly LevelContainerFactory _levelFactory = default!;
+
+    public async UniTask Run(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            // show title, wait for input, then load level
+            await using (IContainer level = await _container
+                .CreateChild("Level")
+                .AddFromBuilder(_levelFactory)
+                .AddScene(levelDef.SceneRef)
+                .Build(token))
+            {
+                await level.Run<IRunnable>(token);
+            }
+        }
+    }
+}
+```
+
+## Container Hierarchy
+
+Game projects build a chain of nested container scopes. Each scope has a `ContainerBuilderFactory` ScriptableObject:
+
+```
+Main (framework)
+  -> App (SlumberContainerFactory)
+    -> Session (SessionContainerFactory)
+      -> Level (LevelContainerFactory)
+        -> Gameplay (GameplayContainerFactory)
+```
+
+Each factory registers its scope's services, child factories, and runnable:
+
+```csharp
+public sealed class SessionContainerFactory : ContainerBuilderFactory
+{
+    [SerializeField] private LevelContainerFactory _levelFactory = default!;
+    [SerializeField] private LevelDefinition _defaultLevel = default!;
+
+    public override IContainerBuilder AddToBuilder(IContainerBuilder builder)
+    {
+        return builder
+            .AddScoped<ICursorService, CursorService>()
+            .AddSingleton(_levelFactory)
+            .AddSingleton(_defaultLevel)
+            .AddTransient<IRunnable, SessionState>();
+    }
+}
+```
+
+## MVC Pattern
+
+UI features use the framework's MVC system. Each feature has four parts:
+
+**Model** -- serializable data record with an enum ID. No logic.
+
+```csharp
+[Serializable]
+public record HudModel : Model<HudModelId>
+{
+    [SerializeField] private float _crosshairRestSize = 24f;
+    public float CrosshairRestSize => _crosshairRestSize;
+}
+```
+
+**View** -- MonoBehaviour implementing `IView`. Pure display, setter methods only. No business logic.
+
+```csharp
+public class HudView : MonoBehaviour, IView
+{
+    [SerializeField] private TMP_Text loadedAmmoText = default!;
+
+    public void SetAmmo(int loaded, int reserve) { /* update UI */ }
+
+    public UniTask OpenAnimation(CancellationToken token) => UniTask.CompletedTask;
+    public void OpenAnimationFinished() { }
+    public UniTask CloseAnimation(CancellationToken token) => UniTask.CompletedTask;
+    public void CloseAnimationFinished() { }
+}
+```
+
+**Controller** -- orchestrates model and view. Receives dependencies via `[Dependency]`.
+
+```csharp
+public sealed class HudController : Controller<HudModel, HudView>
+{
+    [Dependency] private readonly PlayerController _player = default!;
+
+    protected override async UniTask<VoidReturn> Run(HudView view, CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            await UniTask.Yield(PlayerLoopTiming.LastUpdate, token);
+            view.SetCrosshairSize(/* ... */);
+        }
+        return default;
+    }
+}
+```
+
+**Factory** -- ScriptableObject that wires the MVC triad into a container. Registered as a child in the parent factory.
+
+```csharp
+[FactoryMenuItem("HUD", "Slumber")]
+public sealed class HudFactory : Factory<HudModelId, HudModel, HudView, HudController> { }
+```
+
+Wire MVC factories into gameplay via `AddChild`:
+
+```csharp
+public sealed class GameplayContainerFactory : ContainerBuilderFactory
+{
+    [SerializeField] private PlayerFactory _playerFactory = default!;
+    [SerializeField] private HudFactory _hudFactory = default!;
+
+    public override IContainerBuilder AddToBuilder(IContainerBuilder builder)
+    {
+        return builder
+            .AddChild(_playerFactory)
+            .AddChild(_hudFactory)
+            .AddTransient<IRunnable, GameplayState>();
+    }
+}
+```
+
+## Services
+
+Define an interface, implement as a class, register via `AddScoped<IService, Impl>()`:
+
+```csharp
+public interface IInputService
+{
+    Vector2 MoveInput { get; }
+    bool FirePressed { get; }
+}
+
+public sealed class InputService : IInputService, IInitializable, IDisposable
+{
+    [Dependency] private readonly InputActionAsset _actions = default!;
+
+    public UniTask Initialize(CancellationToken token) { /* bind actions */ }
+    public void Dispose() { /* unbind */ }
+}
+```
+
+## Folder Structure
+
+Organize by feature domain with MVC subdirectories:
+
+```
+Assets/Scripts/
+  MainArgs.cs
+  AppContainerFactory.cs
+  States/
+    SessionState.cs
+    GameplayState.cs
+  Services/
+    IInputService.cs
+    InputService.cs
+  Data/
+    LevelDefinition.cs
+  Factories/
+    SessionContainerFactory.cs
+    LevelContainerFactory.cs
+    GameplayContainerFactory.cs
+  Player/
+    PlayerFactory.cs
+    Controllers/PlayerController.cs
+    Views/PlayerView.cs
+    Models/PlayerModel.cs
+  HUD/
+    HudFactory.cs
+    Controllers/HudController.cs
+    Views/HudView.cs
+    Models/HudModel.cs
+```
+
+## C# Conventions
+
+- All files: `#nullable enable` at top, `#nullable disable` at bottom.
+- `[Dependency]` fields: `private readonly T _field = default!;`
+- `[SerializeField]` fields: `private T _field = default!;`
+- Namespace: match folder path under project root (e.g., `DeepForestLabs.Slumber.States`).

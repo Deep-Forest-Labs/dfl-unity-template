@@ -1,148 +1,64 @@
-# Deep Forest Labs Unity Template
+# DFL Unity Template
 
-A bootstrapped Unity 6.4 LTS project template with the DFL DI/MVC framework pre-configured and ready to go.
+A ready-to-go Unity project template pre-configured with all Deep Forest Labs packages, OpenUPM dependencies, and a minimal app scaffold.
 
-## What's included
+## Prerequisites
 
-- **DI container** with parent-child scoping and request scopes
-- **MVC architecture** with reactive model binding and view pooling
-- **Async lifecycle** powered by UniTask with CancellationToken scoping
-- **Addressables management** for asset loading with configurable load strategy
-- **Multi-platform build system** supporting Android, iOS, Windows Standalone, and WebGL
-- **Error reporting** via `IErrorReporter` abstraction (Sentry by default)
-- **Structured logging** with compile-time stripping and runtime filtering
+- **Unity 2022.3 LTS** or later
+- **GitHub access** to [dfl-unity-packages](https://github.com/Deep-Forest-Labs/dfl-unity-packages) (private repo)
+- **Git credentials** configured -- run `gh auth login` or ensure [Git Credential Manager](https://github.com/git-ecosystem/git-credential-manager) is installed
 
-## Supported Platforms
-
-| Platform | Build Target | Notes |
-|----------|-------------|-------|
-| Android | `BuildTarget.Android` | APK/AAB, Gradle, keystore signing |
-| iOS | `BuildTarget.iOS` | Xcode project generation, ATT, Bitcode |
-| Windows | `BuildTarget.StandaloneWindows64` | IL2CPP `.exe` output |
-| WebGL | `BuildTarget.WebGL` | IL2CPP, configurable compression |
-
-## Getting started
-
-### 1. Clone this repo
+## Quick Start
 
 ```bash
-git clone https://github.com/Deep-Forest-Labs/dfl-unity-template.git MyNewGame
-cd MyNewGame
-rm -rf .git
-git init
+git clone https://github.com/Deep-Forest-Labs/dfl-unity-template.git
+cd dfl-unity-template
 ```
 
-### 2. Open in Unity
+Open the project in Unity Hub. On first open, Unity will resolve all packages via Git URLs -- no additional repositories need to be cloned.
 
-Open the project in **Unity 6.4 LTS** (6000.4.3f1 or compatible).
+## What's Included
 
-On first open, Unity will resolve packages from `Packages/manifest.json`. The three framework packages are referenced via local `file:` paths pointing to a sibling `dfl-unity-packages` checkout. Ensure both repos are cloned as siblings:
+- All DFL packages (framework, audio, build system, logger) pinned to `v1.0.0`
+- OpenUPM scoped registry for UniTask, ZString, and ZLinq
+- `MainArgs` asset at `Assets/Resources/MainArgs`
+- `AppContainerFactory` scaffold at `Assets/Scripts/AppContainerFactory.cs`
+- `AppState` entry point at `Assets/Scripts/AppState.cs`
+- Sentry error reporting integration
+- NuGetForUnity + ZLinq drop-in generator
 
-```
-parent/
-  dfl-unity-packages/
-  dfl-unity-template/   (this repo)
-```
+## Creating a New Game From This Template
 
-### 3. Verify ScriptableObject assets
+1. Use GitHub's "Use this template" button or clone and re-init:
+   ```bash
+   git clone https://github.com/Deep-Forest-Labs/dfl-unity-template.git my-game
+   cd my-game
+   rm -rf .git && git init
+   ```
+2. Open in Unity
+3. Run the **Project Setup Wizard** (menu: Deep Forest Labs > Project Setup) to rename assemblies and configure your project identity
+4. Start building services in `AppContainerFactory`
 
-The following assets in `Assets/Resources/` should load correctly:
+## Local Package Development
 
-| Asset | Script | Purpose |
-|-------|--------|---------|
-| `MainArgs.asset` | `MainArgs.cs` | Root DI container configuration |
-| `LogFilter.asset` | `LogFilter` (from logger package) | Runtime log filtering |
-| `AppContainer.asset` | `AppContainerFactory.cs` | App-scope DI container |
+To edit DFL packages alongside your game, temporarily replace a Git URL in `Packages/manifest.json` with a local `file:` path:
 
-`BuildSettings.asset` is auto-created by the build system's `InitializeOnLoad` hook when Unity opens.
-
-If any asset shows a "Missing Script" warning, right-click it and reimport, or delete and recreate it via **Create > ScriptableObject** in the Project window.
-
-### 4. Configure your target platform
-
-1. **Switch platform** via File > Build Settings
-2. **Set orientation** in `BuildSettings.asset` (defaults to Portrait)
-3. **Set asset load strategy** in `BuildSettings.asset` — `RemoteCDN` (default) or `LocalBundles` for offline/WebGL builds
-4. **Error reporting** is configured in `MainArgs.cs` — defaults to `SentryErrorReporter`. Swap to `NullErrorReporter` for platforms without Sentry support.
-
-### 5. Start building
-
-Edit `AppState.cs` to add your game logic. Register new states and services in `AppContainerFactory.cs`. The framework boots automatically via the `MainArgs` → `MainState` lifecycle.
-
-## Project structure
-
-```
-Assets/
-  Scripts/
-    MainArgs.cs               — root DI container (registers BuildSettings, IMain, IErrorReporter, stubs)
-    AppMain.cs                 — IMain implementation (lifecycle hooks)
-    AppState.cs                — first IRunnable after boot (your game starts here)
-    AppContainerFactory.cs     — app-scope container (register your states/services)
-    NullAnalyticsHelper.cs     — no-op IAnalyticsErrorHelper
-    NullErrorController.cs     — no-op IErrorStateController
-  Resources/
-    MainArgs.asset             — MainArgs ScriptableObject instance
-    LogFilter.asset            — log filter configuration
-    AppContainer.asset         — app container factory instance
-  Scenes/
-    Boot.unity                 — empty boot scene (build index 0)
-Packages/
-  manifest.json                — UPM dependencies (framework via file: paths)
-ProjectSettings/               — Unity 6.4 LTS project settings
+```json
+"com.deepforestlabs.framework": "file:../../dfl-unity-packages/Packages/com.deepforestlabs.framework"
 ```
 
-## Package dependencies
+This requires [dfl-unity-packages](https://github.com/Deep-Forest-Labs/dfl-unity-packages) cloned as a sibling directory. Revert to the Git URL before committing.
 
-The framework packages are sourced from [`dfl-unity-packages`](https://github.com/Deep-Forest-Labs/dfl-unity-packages):
+## Updating Packages
 
-- `com.deepforestlabs.framework` — core DI/MVC/async framework
-- `com.deepforestlabs.logger` — structured logging
-- `com.deepforestlabs.buildsystem` — multi-platform build pipeline and environment config
-- `com.deepforestlabs.audio` — audio service with pooling and mixer integration
+When a new version is tagged in `dfl-unity-packages` (e.g. `v1.1.0`), update the tag suffix in `Packages/manifest.json`:
 
-### ZLinq (zero-allocation LINQ)
-
-This template comes pre-configured with [ZLinq](https://github.com/Cysharp/ZLinq), a zero-allocation LINQ library from Cysharp. The drop-in source generator automatically optimizes all LINQ operations on arrays and lists with no code changes required.
-
-**How it works:** The `[assembly: ZLinqDropIn]` attribute in `Assets/Scripts/AssemblyInfo.cs` tells the source generator to create extension methods that shadow `System.Linq` for concrete collection types. Standard LINQ like `.Where()`, `.Select()`, `.FirstOrDefault()`, `.ToArray()` on `T[]` and `List<T>` compiles to zero-allocation ZLinq calls automatically.
-
-**ZLinq.Unity** provides zero-allocation GameObject/Transform tree traversal:
-
-```csharp
-using ZLinq;
-
-// Find all active enemies under a transform
-var enemies = transform.Descendants()
-    .OfComponent<EnemyController>()
-    .Where(e => e.IsAlive);
-
-// Get all child renderers
-var renderers = transform.Children()
-    .OfComponent<Renderer>();
+```
+#v1.0.0  -->  #v1.1.0
 ```
 
-**Manual optimization** for hot paths where you want explicit control:
+If Unity doesn't pick up the change, delete the affected entries from `Packages/packages-lock.json` and reopen the project.
 
-```csharp
-using ZLinq;
+## Documentation
 
-// Explicit zero-alloc enumeration on any IEnumerable<T>
-foreach (var item in source.AsValueEnumerable().Where(x => x.IsActive))
-{
-    // ...
-}
-```
-
-**Configuration:** Edit `Assets/Scripts/AssemblyInfo.cs` to control which collection types are optimized. The default (`Array | List`) is conservative. Add `DropInGenerateTypes.Enumerable` to also optimize `IEnumerable<T>` sources (more aggressive, see [ZLinq docs](https://github.com/Cysharp/ZLinq#drop-in-replacement) for trade-offs).
-
-**NuGetForUnity:** The `ZLinq.DropInGenerator` source generator is managed via NuGetForUnity (configured in `Assets/packages.config`). On first project open, open **NuGet > Manage NuGet Packages** to restore packages if the generator DLL is not present.
-
-## Notes
-
-### System.Runtime.CompilerServices.Unsafe.dll
-
-Unity 6000.4 ships `System.Runtime.CompilerServices.Unsafe` as part of its managed runtime. The copy in `Assets/Plugins/` was added for compatibility with older Unity versions. If you encounter IL2CPP conflicts on WebGL or Standalone builds, remove `Assets/Plugins/System.Runtime.CompilerServices.Unsafe.dll` and its `.meta` file.
-
-## License
-
-Copyright © 2024 Deep Forest Labs. All rights reserved.
+Full package documentation lives in the [dfl-unity-packages docs/](https://github.com/Deep-Forest-Labs/dfl-unity-packages/tree/main/docs) folder.

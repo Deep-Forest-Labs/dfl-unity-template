@@ -19,7 +19,7 @@ MonoBehaviour:
   _targetFps: 30
   _vscyncCount: 0
   _analyticsAppid: 
-  _analyticsSubversion: 1.6.0
+  _analyticsSubversion: 
   _buildOptions: 0
   _debugBuildOptions: 524673
   _releaseBuildOptions: 0
