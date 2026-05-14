@@ -251,6 +251,38 @@ public sealed class PauseService : IPauseService, IDisposable
 | Read-only observable state on a service interface | `IReadOnlyAsyncReactiveProperty<T>` |
 | One-shot fire-and-forget notification with no state | C# `event` is acceptable |
 
+## Prohibited: FindAnyObjectByType and Unity Global Accessors
+
+Scene MonoBehaviours and Unity singletons must be resolved through DI, never through Unity's `Find*` methods or global accessors. These bypass the container, produce untracked null references, and prevent the DI system from failing fast on missing dependencies.
+
+```csharp
+// BAD -- bypasses DI, null result is silent, no lifecycle management
+var view = Object.FindAnyObjectByType<TitleScreenView>();
+if (view == null) { /* silent fallback */ }
+
+// BAD -- global accessor, can be null (wrong tag, destroyed, race condition)
+Camera cam = Camera.main;
+
+// BAD -- same problem under a different name
+var controller = FindObjectOfType<PixelPipelineController>();
+
+// GOOD -- scene MonoBehaviour registered via AddScene<T>, resolved by container
+// In the ContainerBuilderFactory:
+builder.AddScene<TitleScreenView>(sceneRef);
+// In the consuming class:
+[Dependency] private readonly TitleScreenView _view = default!;
+
+// GOOD -- MVC view resolved through Factory (preferred for UI features)
+// Factory registers Model, View, Controller as a unit via AddChild
+builder.AddChild(_titleScreenFactory);
+// Controller receives the view via its Run method parameter
+
+// GOOD -- camera registered in container, injected where needed
+[Dependency] private readonly Camera _camera = default!;
+```
+
+If a MonoBehaviour exists in a loaded scene, use `AddScene<T>` to register it. If it's a UI feature, use the MVC Factory pattern. The container throws `GameException` or `DiException` if the object is missing -- no silent nulls.
+
 ## Services
 
 Define an interface, implement as a class, register via `AddScoped<IService, Impl>()`:
