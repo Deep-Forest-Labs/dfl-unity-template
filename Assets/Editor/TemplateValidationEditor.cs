@@ -23,7 +23,7 @@ namespace GameName.Editor
             "Assets/Resources/BuildSettings.asset"
         };
 
-        [MenuItem("Tools/DFL/Validate Template")]
+        [MenuItem("Deep Forest Labs/Tools/Validate Template")]
         public static void ValidateTemplate()
         {
             List<ValidationResult> results = ProjectValidator.ValidateProject();
