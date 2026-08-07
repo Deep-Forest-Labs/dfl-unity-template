@@ -1,0 +1,42 @@
+---
+description: DFL GameObject lifecycle -- Checkout via IGameObjectManager with a scope token; never new GameObject, Instantiate, or Destroy in game code
+alwaysApply: true
+---
+
+# DFL GameObject Lifecycle
+
+All runtime GameObjects are owned by the container scope. Never create or destroy them with raw Unity APIs in game code.
+
+## Prohibited
+
+```csharp
+// BAD -- bypasses pooling, asset loading, and scope teardown
+var go = new GameObject("Fx");
+var instance = Object.Instantiate(prefab);
+Object.Destroy(instance);
+```
+
+## Required: GameObjectManager Checkout
+
+Register prefabs on the builder with an **explicit warm policy**, inject the manager, and `Checkout` with a `CancellationToken` from the owning scope or controller. The framework check-ins (or destroys) the instance when that token is cancelled — typically when the child container / controller scope disposes.
+
+```csharp
+// In ContainerBuilderFactory / Factory — pick a warm policy deliberately:
+builder.AddGameObjectManager(_shopCardPrefab, PoolWarmConfig.BuildRequired(16, 16).ToOptions());
+// or Background / OnDemand via PoolWarmConfig — see dfl-asset-loading
+
+// In service / controller:
+[Dependency] private readonly IGameObjectManagerT<ShopCardView> _cards = default!;
+[Dependency] private readonly CancellationToken _token = default!;
+
+ShopCardView card = await _cards.Checkout(parent, token);
+// no Release/Destroy — token cancellation returns it to the pool
+```
+
+Do **not** default every registration to `GameObjectManagerOptions.OnDemand`. Cold first `Checkout` Instantiates on the main thread and causes sheet/UI hitches. Use `BuildRequired` (or `Background`) with a catalog-sized `prewarmCount` for UI the player will open in-session.
+
+Prefer MVC `Factory` for UI/features (the framework checkouts the view for you). Use `IGameObjectManager` / `IGameObjectManagerT<T>` for pooled objects outside MVC (FX, labels, projectiles).
+
+## Scene-placed objects
+
+Roots that live in a loaded scene are registered with `AddScene<T>`, not spawned via managers. They unload when the scene's container disposes.
