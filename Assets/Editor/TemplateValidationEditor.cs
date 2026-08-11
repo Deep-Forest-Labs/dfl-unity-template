@@ -14,7 +14,8 @@ namespace GameName.Editor
             "com.deepforestlabs.framework",
             "com.deepforestlabs.audio",
             "com.deepforestlabs.buildsystem",
-            "com.deepforestlabs.logger"
+            "com.deepforestlabs.logger",
+            "com.deepforestlabs.platform"
         };
 
         private static readonly string[] ExpectedResourceAssets =

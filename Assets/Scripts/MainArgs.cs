@@ -1,6 +1,7 @@
 #nullable enable
 using DeepForestLabs;
 using DeepForestLabs.BuildSystems;
+using DeepForestLabs.Platform;
 using DeepForestLabs.Services;
 using DeepForestLabs.States.Error.Controllers;
 
@@ -13,7 +14,7 @@ namespace GameName
             return base.AddToBuilder(builder)
                 .AddSingleton(BuildSettings.Instance)
                 .AddScoped<IMain, AppMain>()
-                .AddScoped<IAnalyticsErrorHelper, NullAnalyticsHelper>()
+                .AddPlatformServices(PlatformServiceOptions.Null)
                 .AddScoped<IErrorReporter, SentryErrorReporter>()
                 .AddScoped<IErrorStateController, NullErrorController>();
         }
