@@ -49,6 +49,20 @@ To edit DFL packages alongside your game, temporarily replace a Git URL in `Pack
 
 This requires [dfl-unity-packages](https://github.com/Deep-Forest-Labs/dfl-unity-packages) cloned as a sibling directory. Revert to the Git URL before committing.
 
+## Store CI (mobile)
+
+Ghostgarden is the proof consumer for store builds. To add the same pattern to a new game:
+
+1. Set iOS/Android bundle IDs and portrait-only orientation in Project Settings
+2. Copy `ci/` (envlist, scripts, README) and `.github/workflows/store-build.yml` from [dfl-ghostgarden](https://github.com/Deep-Forest-Labs/dfl-ghostgarden)
+3. Register (or reuse) the Deep Forest Labs org self-hosted Mac runner labels: `self-hosted`, `macOS`, `unity`, `store-ci`
+4. Configure per-repo GitHub Actions secrets listed in ghostgarden `ci/README.md`
+5. Keep using `AddPlatformServices` from `com.deepforestlabs.platform`
+
+The template itself does **not** upload to TestFlight/Play. Switch `file:` package refs back to git URLs when the platform epics publish.
+
+Also see [platform.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/platform.md) and [build-system.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/build-system.md).
+
 ## Updating Packages
 
 When a new version is tagged in `dfl-unity-packages` (e.g. `v1.1.0`), update the tag suffix in `Packages/manifest.json`:
