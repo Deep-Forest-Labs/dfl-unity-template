@@ -59,6 +59,15 @@ Ghostgarden is the proof consumer for store builds. To add the same pattern to a
 4. Configure per-repo GitHub Actions secrets listed in ghostgarden `ci/README.md`
 5. Keep using `AddPlatformServices` from `com.deepforestlabs.platform`
 
+### Firebase Analytics (optional)
+
+The template stays on `PlatformServiceOptions.Null`. To opt a game into Firebase:
+
+1. Create a per-game Firebase project; commit `google-services.json` + `GoogleService-Info.plist`
+2. Install Firebase Unity App + Analytics (see [ghostgarden ci/firebase.md](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/blob/master/ci/firebase.md))
+3. Switch device builds to `AddPlatformServices(PlatformServiceOptions.Firebase)` (keep Editor on `Null`)
+4. Keep **Sentry** for crashes/errors — do not wire `IAnalyticsErrorHelper` to Firebase
+
 The template itself does **not** upload to TestFlight/Play. Switch `file:` package refs back to git URLs when the platform epics publish.
 
 Also see [platform.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/platform.md) and [build-system.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/build-system.md).
