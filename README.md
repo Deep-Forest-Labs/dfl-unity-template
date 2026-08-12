@@ -59,14 +59,20 @@ Ghostgarden is the proof consumer for store builds. To add the same pattern to a
 4. Configure per-repo GitHub Actions secrets listed in ghostgarden `ci/README.md`
 5. Keep using `AddPlatformServices` from `com.deepforestlabs.platform`
 
-### Firebase Analytics (optional)
+### Firebase Analytics + Remote Config (optional)
 
-The template stays on `PlatformServiceOptions.Null`. To opt a game into Firebase:
+The template stays on `PlatformServiceOptions.Null`. To opt a game into Firebase (ghostgarden is the reference):
 
 1. Create a per-game Firebase project; commit `google-services.json` + `GoogleService-Info.plist`
-2. Install Firebase Unity App + Analytics (see [ghostgarden ci/firebase.md](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/blob/master/ci/firebase.md))
+2. Install Firebase Unity App + Analytics + Remote Config (see [ghostgarden ci/firebase.md](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/blob/master/ci/firebase.md))
 3. Switch device builds to `AddPlatformServices(PlatformServiceOptions.Firebase)` (keep Editor on `Null`)
 4. Keep **Sentry** for crashes/errors — do not wire `IAnalyticsErrorHelper` to Firebase
+5. Config / force-update opt-in (E3):
+   - RC key `min_required_version` (string; console default `1.0.0`)
+   - Override `IBootConfigClient` in App scope with a local catalog → `BootSnapshot` mapping (no managed economy JSON required)
+   - App-scope gate: parallel RC refresh ∥ boot fetch → `AppVersionGate` → Update Required UI
+   - Debug offline escape: `NOT_RELEASE_BUILD` + PlayerPrefs `dfl.debug.allow_offline_boot`
+6. Tracking for wiring this into the template project itself: [dfl-unity-template#1](https://github.com/Deep-Forest-Labs/dfl-unity-template/issues/1)
 
 The template itself does **not** upload to TestFlight/Play. Switch `file:` package refs back to git URLs when the platform epics publish.
 
