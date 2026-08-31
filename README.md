@@ -73,6 +73,13 @@ The template stays on `PlatformServiceOptions.Null`. To opt a game into Firebase
    - App-scope gate: parallel RC refresh ∥ boot fetch → `AppVersionGate` → Update Required UI
    - Debug offline escape: `NOT_RELEASE_BUILD` + PlayerPrefs `dfl.debug.allow_offline_boot`
 6. Tracking for wiring this into the template project itself: [dfl-unity-template#1](https://github.com/Deep-Forest-Labs/dfl-unity-template/issues/1)
+7. Account / cloud save opt-in (E6):
+   - Install `com.google.firebase.auth` + `com.google.firebase.firestore` (same tarball script as Analytics / RC)
+   - Device `PlatformServiceOptions.Firebase` registers Auth + Firestore adapters; Editor stays `Null`
+   - Game owns save schema and Settings account chrome (status, email/password, Create / Sign in / Sign out / Forgot password, conflict)
+   - Local-authoritative: upload after save; download on Sign in or empty local; ask **Use cloud** vs **Keep this device** when both have progress
+   - Apple / Google Sign-In later (needs store accounts / bundle IDs)
+   - Reference: [ghostgarden ci/firebase.md](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/blob/master/ci/firebase.md), [platform.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/platform.md) Account / Cloud save, epic [#35](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/issues/35)
 
 The template itself does **not** upload to TestFlight/Play. Switch `file:` package refs back to git URLs when the platform epics publish.
 
