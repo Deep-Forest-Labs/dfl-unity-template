@@ -80,6 +80,11 @@ The template stays on `PlatformServiceOptions.Null`. To opt a game into Firebase
    - Local-authoritative: upload after save; download on Sign in or empty local; ask **Use cloud** vs **Keep this device** when both have progress
    - Apple / Google Sign-In later (needs store accounts / bundle IDs)
    - Reference: [ghostgarden ci/firebase.md](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/blob/master/ci/firebase.md), [platform.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/platform.md) Account / Cloud save, epic [#35](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/issues/35)
+8. Ads / MAX opt-in (E4):
+   - Stay on `NullAdService` until AppLovin MAX signup (needs a live store URL)
+   - Game App scope (after ATT) registers `IAdPlacementConfig` + `IMaxSdkClient` + `MaxAdService`; keep Editor on Null
+   - MAX plugin + `DFL_MAX_SDK` live in the game — do not commit the plugin or the define until MAX is a real dependency
+   - Reference: [ghostgarden ci/ads-max.md](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/blob/master/ci/ads-max.md), [platform.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/platform.md) Ads, epic [#33](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/issues/33)
 
 The template itself does **not** upload to TestFlight/Play. DFL packages resolve from GitHub `dfl-unity-packages` (`#master` for framework / buildsystem / platform — `com.deepforestlabs.platform` is not on `v1.0.0`). Use a local `file:` path only while editing packages.
 
