@@ -81,7 +81,7 @@ The template stays on `PlatformServiceOptions.Null`. To opt a game into Firebase
    - Apple / Google Sign-In later (needs store accounts / bundle IDs)
    - Reference: [ghostgarden ci/firebase.md](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/blob/master/ci/firebase.md), [platform.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/platform.md) Account / Cloud save, epic [#35](https://github.com/Deep-Forest-Labs/dfl-ghostgarden/issues/35)
 
-The template itself does **not** upload to TestFlight/Play. Switch `file:` package refs back to git URLs when the platform epics publish.
+The template itself does **not** upload to TestFlight/Play. DFL packages resolve from GitHub `dfl-unity-packages` (`#master` for framework / buildsystem / platform — `com.deepforestlabs.platform` is not on `v1.0.0`). Use a local `file:` path only while editing packages.
 
 Also see [platform.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/platform.md) and [build-system.md](https://github.com/Deep-Forest-Labs/dfl-unity-packages/blob/master/docs/build-system.md).
 
